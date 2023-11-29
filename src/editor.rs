@@ -1,3 +1,4 @@
+use std::env;
 use crate::Row;
 use crate::Document;
 use crate::Terminal;
@@ -36,11 +37,18 @@ impl Editor {
         }
     }
     pub fn default() -> Self{
+        let args: Vec<String> = env::args().collect();
+        let document = if args.len() > 1 {
+            let file_name = &args[1];
+            Document::open(&file_name).unwrap_or_default()
+        } else {
+            Document::default()
+        };
         Self{
             should_quit: false,
             terminal: Terminal::default().expect("Failed to initialize terminal"),
             cursor_position: Position::default(),
-            document: Document::open(),
+            document,
         }
     }
     fn process_keypress(&mut self) -> Result<(), std::io::Error> {
