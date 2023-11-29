@@ -1,0 +1,20 @@
+# Compiled files
+/target/
+
+# These directories store cache and intermediate files
+**/*.rs.bk
+
+# IDE - IntelliJ
+.idea/
+
+# Dependency directory
+/.cargo/
+
+# Rustup directory
+/.rustup/
+
+# Environment variable file
+.env
+
+# Ignore .DS_Store files (Mac OS)
+.DS_Store
