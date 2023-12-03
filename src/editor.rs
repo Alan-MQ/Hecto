@@ -15,6 +15,7 @@ pub struct Editor {
     terminal: Terminal,
     cursor_position: Position,
     document: Document,
+    offset: Position,
 }
 fn die(e: &std::io::Error) {
     Terminal::clear_screen();
@@ -28,7 +29,7 @@ impl Editor {
                 die(&error);
             }
             if self.should_quit {
-                println!("Goodbye.\r");
+                println!("Goodbye from run method.\r");
                 break;
             }
             if let Err(error) = self.process_keypress() {
@@ -49,6 +50,7 @@ impl Editor {
             terminal: Terminal::default().expect("Failed to initialize terminal"),
             cursor_position: Position::default(),
             document,
+            offset: Position::default(),
         }
     }
     fn process_keypress(&mut self) -> Result<(), std::io::Error> {
@@ -75,11 +77,13 @@ impl Editor {
     
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
         // print!("\x1b[2J");
+        println!("refresh_screen triggered");
+        self.draw_row(&Row::from("yoyoyoyoyo"));
         Terminal::cursor_hide();
         Terminal::clear_screen();
         Terminal::cursor_position(&Position::default());
         if self.should_quit {
-            println!("Goodbye.\r");
+            println!("Goodbye from refresh_screen method.\r");
         } else {
             self.draw_rows();
             Terminal::cursor_position(&self.cursor_position);
@@ -91,7 +95,7 @@ impl Editor {
         let height = self.terminal.size().height;
         for terminal_row in 0..height - 1 {
             Terminal::clear_current_line();
-            if let Some(row) = self.document.row(terminal_row as usize) {
+            if let Some(row) = self.document.row(terminal_row as usize + self.offset.y) {
                 self.draw_row(row)
             } else if self.document.is_empty() && terminal_row == height / 3 {
                 self.draw_welcome_message();
@@ -111,8 +115,9 @@ impl Editor {
         println!("{}\r", welcome_message);
     }
     pub fn draw_row(&self, row: &Row) {
-        let start = 0;
-        let end = self.terminal.size().width as usize;
+        let start = self.offset.x;
+        let width = self.terminal.size().width as usize;
+        let end = start + width;
         let row = row.render(start, end);
         println!("{}\r", row);
     }
