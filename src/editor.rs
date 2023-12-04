@@ -59,22 +59,63 @@ impl Editor {
         let pressed_key = Terminal::read_key()?;
         match pressed_key {
             Key::Ctrl('q') => self.should_quit = true,
-            Key::Up | Key::Down | Key::Left | Key::Right => self.move_cursor(pressed_key),
+            Key::Up 
+            | Key::Down 
+            | Key::Left 
+            | Key::Right
+            | Key::PageUp
+            | Key::PageDown
+            | Key::End
+            | Key::Home => self.move_cursor(pressed_key),
             _ => (),
         }
+        self.scroll();
         Ok(())
     }
 
+    fn scroll(&mut self) {
+        let Position{x, y} = self.cursor_position;
+        let width = self.terminal.size().width as usize;
+        let height = self.terminal.size().height as usize;
+        let mut offset = &mut self.offset;
+        if y < offset.y {
+            offset.y = y;
+        } else if y >= offset.y.saturating_add(height) {
+            offset.y = y.saturating_sub(height).saturating_add(1);
+        }
+        if x < offset.x {
+            offset.x = x;
+        } else if x >= offset.x.saturating_add(width) {
+            offset.x = x.saturating_sub(width).saturating_add(1);
+        }
+    }
+
     fn move_cursor(&mut self, key: Key) {
-            let Position { mut y, mut x} = self.cursor_position;
-            match key {
-                Key::Up => y = y.saturating_sub(1),
-                Key::Down => y = y.saturating_add(1),
-                Key::Right => x = x.saturating_add(1),
-                Key::Left => x = x.saturating_sub(1),
-                _ => (),
+        let Position { mut y, mut x} = self.cursor_position;
+        let size = self.terminal.size();
+        let height = size.height.saturating_sub(1) as usize;
+        let width = size.width.saturating_sub(1) as usize;
+
+        match key {
+            Key::Up => y = y.saturating_sub(1),
+            Key::Down => {
+                if y < height {
+                    y = y.saturating_add(1);
+                }
             }
-            self.cursor_position = Position { x, y }
+            Key::Right => {
+                if x < width {
+                    x = x.saturating_add(1);
+                }
+            }
+            Key::Left => x = x.saturating_sub(1),
+            Key::PageUp => y = 0,
+            Key::PageDown => y = height,
+            Key::Home => x = 0,
+            Key::End => x = width,
+            _ => (),
+        }
+        self.cursor_position = Position { x, y }
     }
     
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
