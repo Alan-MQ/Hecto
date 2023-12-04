@@ -37,6 +37,7 @@ impl Editor {
             }
         }
     }
+
     pub fn default() -> Self{
         let args: Vec<String> = env::args().collect();
         let document = if args.len() > 1 {
@@ -53,6 +54,7 @@ impl Editor {
             offset: Position::default(),
         }
     }
+
     fn process_keypress(&mut self) -> Result<(), std::io::Error> {
         let pressed_key = Terminal::read_key()?;
         match pressed_key {
@@ -64,15 +66,15 @@ impl Editor {
     }
 
     fn move_cursor(&mut self, key: Key) {
-        let Position { mut y, mut x} = self.cursor_position;
-        match key {
-            Key::Up => y = y.saturating_sub(1),
-            Key::Down => y = y.saturating_add(1),
-            Key::Right => x = x.saturating_add(1),
-            Key::Left => x = x.saturating_sub(1),
-            _ => (),
-        }
-        self.cursor_position = Position { x, y }
+            let Position { mut y, mut x} = self.cursor_position;
+            match key {
+                Key::Up => y = y.saturating_sub(1),
+                Key::Down => y = y.saturating_add(1),
+                Key::Right => x = x.saturating_add(1),
+                Key::Left => x = x.saturating_sub(1),
+                _ => (),
+            }
+            self.cursor_position = Position { x, y }
     }
     
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
@@ -91,6 +93,7 @@ impl Editor {
         Terminal::cursor_show();
         Terminal::flush()
     }
+
     fn draw_rows(&self) {
         let height = self.terminal.size().height;
         for terminal_row in 0..height - 1 {
@@ -104,6 +107,7 @@ impl Editor {
             }
         }
     }
+
     fn draw_welcome_message(&self) {
         let mut welcome_message = format!("Hecto editor --version{}", VERSION);
         let width = self.terminal.size().width as usize;
@@ -114,6 +118,7 @@ impl Editor {
         welcome_message.truncate(width);
         println!("{}\r", welcome_message);
     }
+
     pub fn draw_row(&self, row: &Row) {
         let start = self.offset.x;
         let width = self.terminal.size().width as usize;
