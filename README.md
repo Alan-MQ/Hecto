@@ -7,6 +7,7 @@
 + cargo run filename
 + 目前仅支持mac环境
 + 建议使用iterm2 并且有font依赖 （编辑器表情图案正在路上）
++ eg: cargo run src/Cargo.toml
 
 ### 参考开源博客
 [Hecto](https://www.flenker.blog/categories/#hecto) 的作者博客教学， 巨详细， 强烈推荐
